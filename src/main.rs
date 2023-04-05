@@ -4,10 +4,10 @@
 #![test_runner(rust_kernel::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-use::core::panic::PanicInfo;
+use ::core::panic::PanicInfo;
 use rust_kernel::println;
 
-#[no_mangle] // dont mangle the name of this function 
+#[no_mangle] // dont mangle the name of this function
 pub extern "C" fn _start() -> ! {
     // this function is the entry point, since linker looks for a function
     // called '_start' by default
@@ -15,8 +15,12 @@ pub extern "C" fn _start() -> ! {
 
     rust_kernel::init();
 
-    // invoke a breakpoint exeption
-    x86_64::instructions::interrupts::int3();
+    fn stack_overflow() {
+        stack_overflow(); // for each return, the return address is pushed
+    }
+
+    // trigger stack overflow
+    stack_overflow();
 
     #[cfg(test)]
     test_main();
