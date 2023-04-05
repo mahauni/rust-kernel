@@ -15,18 +15,11 @@ pub extern "C" fn _start() -> ! {
 
     rust_kernel::init();
 
-    fn stack_overflow() {
-        stack_overflow(); // for each return, the return address is pushed
-    }
-
-    // trigger stack overflow
-    stack_overflow();
-
     #[cfg(test)]
     test_main();
 
     println!("It did not crash");
-    loop {}
+    rust_kernel::hlt_loop();
 }
 
 // function called on panic
@@ -34,7 +27,8 @@ pub extern "C" fn _start() -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    
+    rust_kernel::hlt_loop();
 }
 
 #[cfg(test)]
