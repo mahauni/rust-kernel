@@ -40,3 +40,13 @@ rustup component add llvm-tools-preview
 
 
 for it to work you will need the qemu for x84_64 processors
+
+
+## EXCEPTIONS
+
+https://os.phil-opp.com/cpu-exceptions/
+
+important stuff black magic that is important to understand.
+
+I has some incredible insights like how a debuger work and other cool stuff and black magic stuff
+a lot of articles too to help.
