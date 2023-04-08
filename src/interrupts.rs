@@ -53,6 +53,10 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
 
     let mut port = Port::new(0x60);
     let scancode: u8 = unsafe { port.read() };
+    
+    // See the ASCII of the character of the key
+    // print!("{}", scancode);
+
     crate::task::keyboard::add_scancode(scancode);
 
     unsafe {

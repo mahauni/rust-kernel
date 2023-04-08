@@ -103,6 +103,8 @@ impl Writer {
     pub fn write_string(&mut self, s: &str) {
         for byte in s.bytes() {
             match byte {
+                // backspace
+                // idk => backspace(),
                 // Printable ASCII character of new line 
                 0x20..=0x7e | b'\n' => self.write_byte(byte),
                 // not part of printable ASCII characters
