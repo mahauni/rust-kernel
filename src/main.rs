@@ -5,13 +5,25 @@
 #![reexport_test_harness_main = "test_main"]
 
 use ::core::panic::PanicInfo;
+use alloc::{boxed::Box, rc::Rc, vec, vec::Vec};
+use bootloader::{entry_point, BootInfo};
 use rust_kernel::println;
-use bootloader::{BootInfo, entry_point};
-use alloc::{boxed::Box, vec, vec::Vec, rc::Rc};
+use rust_kernel::task::keyboard;
+use rust_kernel::task::{simple_executor::SimpleExecutor, Task};
+use rust_kernel::task::executor::Executor;
 
 extern crate alloc;
 
 entry_point!(kernel_main);
+
+async fn async_number() -> u32 {
+    69
+}
+
+async fn example_task() {
+    let number = async_number().await;
+    println!("async number: {}", number);
+}
 
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
     use rust_kernel::allocator;
@@ -25,26 +37,32 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     let mut mapper = unsafe { memory::init(phys_mem_offset) };
     let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
 
-    allocator::init_heap(&mut mapper, &mut frame_allocator)
-        .expect("heap initialization failed");
-    
-    let heap_value = Box::new(69);
-    println!("heap_value at {:p}", heap_value);
+    allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
+
+    let mut executor = Executor::new();
+    executor.spawn(Task::new(example_task()));
+    executor.spawn(Task::new(keyboard::print_keypresses()));
+    executor.run();
+
+    // Heap
+    // let heap_value = Box::new(69);
+    // println!("heap_value at {:p}", heap_value);
 
     // create a dynamically sized vector
-    let mut vec = Vec::new();
-    for i in 0..500 {
-        vec.push(i);
-    }
-    println!("vec at {:p}", vec.as_slice());
+    // let mut vec = Vec::new();
+    // for i in 0..500 {
+    //     vec.push(i);
+    // }
+    // println!("vec at {:p}", vec.as_slice());
 
     // create a reference counter vector -> will be freed when count reaches 0
-    let reference_counted = Rc::new(vec![1, 2, 3]);
-    let cloned_reference = reference_counted.clone();
-    println!("current reference count is {}", Rc::strong_count(&cloned_reference));
-    core::mem::drop(reference_counted);
-    println!("current reference count {} now", Rc::strong_count(&cloned_reference));
+    // let reference_counted = Rc::new(vec![1, 2, 3]);
+    // let cloned_reference = reference_counted.clone();
+    // println!("current reference count is {}", Rc::strong_count(&cloned_reference));
+    // core::mem::drop(reference_counted);
+    // println!("current reference count {} now", Rc::strong_count(&cloned_reference));
 
+    // Pages
     // map an unused page
     // let page = Page::containing_address(VirtAddr::new(0xdeadbeaf000));
     // memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
@@ -81,7 +99,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    
+
     rust_kernel::hlt_loop();
 }
 

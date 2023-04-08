@@ -94,3 +94,10 @@ $ cargo test
 ```
 
 And then it should be able to run all the test in our /tests folder.
+
+
+## For now the tutorial of the person is now complete
+
+But its not nowhere done, there still some thing to implement. Some thing there is on https://os.phil-opp.com/async-await/ and there you should have some implementations that are challenging.
+
+Re read more about the async-await, because i didnt understand all of it, too much information and is too strange now. But is a good thing to know, so read later and try to understand it.
